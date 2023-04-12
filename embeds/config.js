@@ -1,7 +1,7 @@
-const { MessageEmbed } = require('discord.js');
+import { MessageEmbed } from 'discord.js';
 
 
-module.exports = {
+export const configEmbed = {
     configEmbed : new MessageEmbed()
     .setColor('#0099ff')
     .setTitle('Server Setup - Birthday Channel')
