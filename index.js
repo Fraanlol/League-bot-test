@@ -37,15 +37,13 @@ async function loadEvents(files) {
 loadEvents(eventFiles);
 
 
-
 // Cron Timer
 const gameStack = [];
 
 async function handleMatch() {
   try {
-    const summData = await summs.execute(process.env.api_key, 'Lg Duko'); //SOLOQ 91PL
+    const summData = await summs.execute(process.env.api_key, 'Lg Duko');
     const liveData = await liveGame.execute(process.env.api_key, summData.id);
-    gameResult.execute(true, client, 20)
 
 
     if (liveData != 404) { //&& liveData.gameQueueConfigId === 420
@@ -57,9 +55,13 @@ async function handleMatch() {
       if(gameStack.filter(k => k.includes(liveData[0].gameId)).length){
         console.log('Game is already in STACK');
       }else{
-        let lp = await getLP.execute(process.env.api_key, summData.id, liveData[1]);
-        gameStack.push([liveData[0].gameId, lp]);
-        console.log('Game added to STACK', liveData[0].gameId, lp)
+        let leagueData = {
+          currentLp : await getLP.execute(process.env.api_key, summData.id, liveData[1]),
+          isPromo : true,
+          promoData : promoObj ? '':promoObj// boolean to check if its promo 
+          }
+        gameStack.push([liveData[0].gameId, leagueData]);
+        console.log('Game added to STACK', liveData[0].gameId, leagueData.currentLp)
       }
     } else {
       console.log('Mauri no esta en partida');
@@ -73,9 +75,14 @@ async function handleMatch() {
         if (summParticipant) {
           const win = summParticipant.win;
           // Send message of win or lose
-          const response = await getLP.execute(process.env.api_key, summData.id, liveData[1]);
-          console.log('Calculando datos...', 'LP:', response, 'lp anterior',  gameStack[0][1])
-          gameResult.execute(win)
+          if(!leagueData.isPromo){
+            const response = await getLP.execute(process.env.api_key, summData.id, liveData[1]);
+            leagueData.lpAfter = response;
+            gameResult.execute(win, client, leagueData);
+            
+          }else{
+            gameResult.execute(win, client, leagueData);
+          }
           gameStack.shift();
         } else {
           console.log(`Mauri no participo en el juego ${gameStack[0][0]}`);
