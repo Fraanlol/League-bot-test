@@ -10,7 +10,7 @@ export const getLP = {
     
             rp.forEach(element => {
                 if(element.queueType === typeQ ){ // 'RANKED_FLEX_SR'
-                    lp = element.leaguePoints;
+                    lp = element;
                 }
             })
             return lp;

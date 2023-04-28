@@ -55,13 +55,9 @@ async function handleMatch() {
       if(gameStack.filter(k => k.includes(liveData[0].gameId)).length){
         console.log('Game is already in STACK');
       }else{
-        let leagueData = {
-          currentLp : await getLP.execute(process.env.api_key, summData.id, liveData[1]),
-          isPromo : true,
-          promoData : promoObj ? '':promoObj// boolean to check if its promo 
-          }
-        gameStack.push([liveData[0].gameId, leagueData]);
-        console.log('Game added to STACK', liveData[0].gameId, leagueData.currentLp)
+        let leagueDataBefore =  await getLP.execute(process.env.api_key, summData.id, liveData[1]);
+        gameStack.push([liveData[0].gameId, leagueDataBefore]);
+        console.log('Game added to STACK', liveData[0].gameId)
       }
     } else {
       console.log('Mauri no esta en partida');
@@ -74,15 +70,10 @@ async function handleMatch() {
 
         if (summParticipant) {
           const win = summParticipant.win;
+        let leagueDataAfter=  await getLP.execute(process.env.api_key, summData.id, liveData[1]);
+        leagueData = {leagueDataBefore, leagueDataAfter}
           // Send message of win or lose
-          if(!leagueData.isPromo){
-            const response = await getLP.execute(process.env.api_key, summData.id, liveData[1]);
-            leagueData.lpAfter = response;
-            gameResult.execute(win, client, leagueData);
-            
-          }else{
-            gameResult.execute(win, client, leagueData);
-          }
+          gameResult.execute(win, client, leagueData);
           gameStack.shift();
         } else {
           console.log(`Mauri no participo en el juego ${gameStack[0][0]}`);
